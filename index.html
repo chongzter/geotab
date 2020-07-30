@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geotab App</title>
+  </head>
+  <body>
+    <header>
+      <h1>Geotab App</h1>
+    </header>
+
+    <div class="container">
+      <div id="example-content">
+        <p>Total vehicles: <span id="vehicleCount">Not determined yet</span></p>
+        <p>Device name: <span id="deviceName">Not specified yet</span></p>
+        <p>Location: <span id="vehiclelocation">Not located yet</span></p>
+        <p>Group: <span id="vehicleGroup">Not labelled yet</span></p>
+      </div>
+
+      <button id="submit">Total vehicles</button>
+      <button id="device">Device</button>
+      <button id="location">Location</button>
+      <button id="group">Group</button>
+    </div>
+    <!-- <script src="js/login.js"></script> -->
+    <script src="js/api.js"></script>
+    <script type="text/javascript">
+      //Total vehicles
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("submit")
+          .addEventListener("click", function (event) {
+            event.preventDefault(0);
+
+            // Authenticating to server
+            var api = GeotabApi(function (authenticateCallback) {
+              authenticateCallback(
+                "my.geotab.com",
+                "izeem_pte_ltd",
+                "seahyw@gmail.com",
+                "test0000",
+                function (err) {
+                  console.log(err);
+                }
+              );
+            });
+
+            api.call(
+              "GetCountOf",
+              {
+                typeName: "Device",
+              },
+              function (result) {
+                if (result) {
+                  document.getElementById("vehicleCount").innerHTML = result;
+                }
+              },
+              function (error) {
+                alert(error);
+              }
+            );
+          });
+      });
+
+      //Devices
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("device")
+          .addEventListener("click", function (event) {
+            event.preventDefault(0);
+
+            // Authenticating to server
+            var api = GeotabApi(function (authenticateCallback) {
+              authenticateCallback(
+                "my.geotab.com",
+                "izeem_pte_ltd",
+                "seahyw@gmail.com",
+                "test0000",
+                function (err) {
+                  console.log(err);
+                }
+              );
+            });
+
+            api.call(
+              "Get",
+              {
+                typeName: "Device",
+                search: {
+                  groups: [{ id: "GroupCompanyId" }],
+                },
+              },
+              function (result) {
+                if (result) {
+                  document.getElementById("deviceName").innerHTML =
+                    result[0].name;
+                  console.log(result[0].name);
+                }
+              },
+              function (error) {
+                alert(error);
+              }
+            );
+          });
+      });
+
+      // Location
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("location")
+          .addEventListener("click", function (event) {
+            event.preventDefault(0);
+
+            // Authenticating to server
+            var api = GeotabApi(function (authenticateCallback) {
+              authenticateCallback(
+                "my.geotab.com",
+                "izeem_pte_ltd",
+                "seahyw@gmail.com",
+                "test0000",
+                function (err) {
+                  console.log(err);
+                }
+              );
+            });
+
+            var results = [];
+            api.call(
+              "Get",
+              {
+                typeName: "DeviceStatusInfo",
+                resultsLimit: 10,
+              },
+              function (statusInfos) {
+                var coordinates = [];
+                statusInfos.forEach(function (statusInfo) {
+                  coordinates.push({
+                    x: statusInfo.longitude,
+                    y: statusInfo.latitude,
+                  });
+                });
+                api.call(
+                  "GetAddresses",
+                  {
+                    coordinates: coordinates,
+                  },
+                  function (addressResults) {
+                    for (var i = 0; i < statusInfos.length; i++) {
+                      results.push({
+                        device: statusInfos[i].device,
+                        isDriving: statusInfos[i].isDriving,
+                        address: addressResults[i],
+                      });
+                    }
+
+                    if (results) {
+                      document.getElementById("vehiclelocation").innerHTML =
+                        results[0].address.formattedAddress;
+                    }
+                  }
+                );
+              }
+            );
+          });
+      });
+
+      //Group Name
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("group")
+          .addEventListener("click", function (event) {
+            event.preventDefault(0);
+
+            // Authenticating to server
+            var api = GeotabApi(function (authenticateCallback) {
+              authenticateCallback(
+                "my.geotab.com",
+                "izeem_pte_ltd",
+                "seahyw@gmail.com",
+                "test0000",
+                function (err) {
+                  console.log(err);
+                }
+              );
+            });
+
+            api.call(
+              "Get",
+              {
+                typeName: "Group",
+              },
+              function (result) {
+                if (result) {
+                  document.getElementById("vehicleGroup").innerHTML =
+                    result[1].name;
+                }
+              },
+              function (error) {
+                alert(error);
+              }
+            );
+          });
+      });
+    </script>
+  </body>
+</html>
